@@ -12,6 +12,9 @@ out/
 # turbo cache
 .turbo/
 
+# million lint cache
+.million/
+
 # env
 .env
 .env.local

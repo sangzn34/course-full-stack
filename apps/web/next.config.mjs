@@ -1,12 +1,19 @@
-import type { NextConfig } from 'next';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import MillionLint from '@million/lint';
 
-const nextConfig: NextConfig = {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Self-contained server output for Docker (apps/web/.next/standalone)
   output: 'standalone',
-  // Monorepo: trace from repo root so @coffee/shared (workspace symlink)
-  // and shared deps under root node_modules get included in standalone output.
-  outputFileTracingRoot: path.join(__dirname, '../..'),
+  experimental: {
+    // Monorepo: trace from repo root so @coffee/shared (workspace symlink)
+    // and shared deps under root node_modules get included in standalone output.
+    // Note: top-level in Next 15+, must be under `experimental` on Next 14.
+    outputFileTracingRoot: path.join(__dirname, '../..'),
+  },
   // In production behind Caddy, /api/* is reverse-proxied by Caddy directly to
   // the NestJS container — no Next.js rewrite needed (and useful to skip,
   // because rewrite would otherwise hairpin through the web server).
@@ -23,4 +30,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default MillionLint.next({ rsc: true })(nextConfig);
