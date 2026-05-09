@@ -2,7 +2,7 @@
 // Runs before slidev dev/build so links to setup guides work on localhost:3030
 // and in the static `dist/` output.
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, cp } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
@@ -26,6 +26,11 @@ const docs = [
     src: 'docs/instructor/master/pre-course-checklist.md',
     out: 'instructor/master/pre-course-checklist.html',
     title: '🔧 Pre-Course Checklist',
+  },
+  {
+    src: 'docs/student/js-ts-primer.md',
+    out: 'student/js-ts-primer.html',
+    title: '📘 JavaScript & TypeScript Primer',
   },
 ];
 
@@ -118,4 +123,15 @@ for (const { src, out, title } of docs) {
   await mkdir(dirname(outPath), { recursive: true });
   await writeFile(outPath, htmlPage(title, html));
   console.log(`✓ ${out}`);
+}
+
+// Copy interactive playground (already self-contained HTML, no markdown render)
+const staticDirs = [
+  { src: 'docs/student/js-playground', out: 'student/js-playground' },
+];
+for (const { src, out } of staticDirs) {
+  const srcAbs = resolve(repoRoot, src);
+  const outAbs = resolve(publicDir, out);
+  await cp(srcAbs, outAbs, { recursive: true });
+  console.log(`✓ ${out}/ (copied)`);
 }

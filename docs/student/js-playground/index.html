@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📘 JS/TS Playground · Coffee Shop Course</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #1e1e2e;
+    --surface: #181825;
+    --surface-2: #11111b;
+    --border: #313244;
+    --fg: #cdd6f4;
+    --muted: #a6adc8;
+    --dim: #6c7086;
+    --coffee: #f5a623;
+    --coffee-dim: #b9791b;
+    --green: #a6e3a1;
+    --red: #f38ba8;
+    --blue: #89b4fa;
+    --pink: #f5c2e7;
+    --mauve: #cba6f7;
+  }
+  html, body { background: var(--bg); color: var(--fg); }
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+  }
+  code, pre, .mono { font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace; }
+  .surface { background: var(--surface); border: 1px solid var(--border); }
+  .surface-2 { background: var(--surface-2); border: 1px solid var(--border); }
+  .coffee { color: var(--coffee); }
+  .muted { color: var(--muted); }
+  .dim { color: var(--dim); }
+
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--coffee); color: var(--coffee); }
+  .btn-primary {
+    background: var(--coffee);
+    border-color: var(--coffee);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--coffee-dim); border-color: var(--coffee-dim); color: var(--bg); }
+  .btn-ghost { background: transparent; }
+
+  .tab {
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab.active { color: var(--coffee); border-color: var(--coffee); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Boxes for scope viz */
+  .scope-box {
+    border: 2px dashed var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    position: relative;
+    transition: border-color 0.4s;
+  }
+  .scope-box.global { border-color: var(--blue); }
+  .scope-box.block { border-color: var(--mauve); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    transition: all 0.4s ease;
+    margin: 0.2rem;
+  }
+  .chip.var { border-color: var(--red); color: var(--red); }
+  .chip.let { border-color: var(--blue); color: var(--blue); }
+  .chip.const { border-color: var(--green); color: var(--green); }
+  .chip.escaped { animation: pulse 0.6s ease 2; }
+  .chip.faded { opacity: 0.3; transform: scale(0.9); }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: 0 0 12px currentColor; }
+  }
+
+  /* Array visualization */
+  .arr-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    transition: all 0.4s ease;
+    position: relative;
+  }
+  .arr-box.entering { animation: slideIn 0.4s ease forwards; }
+  .arr-box.leaving { animation: slideOut 0.4s ease forwards; }
+  .arr-box.transformed { color: var(--coffee); border-color: var(--coffee); }
+  .arr-box.kept { color: var(--green); border-color: var(--green); }
+  .arr-box.filtered-out {
+    color: var(--dim);
+    border-color: var(--dim);
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-40px); }
+  }
+
+  /* Spread animation */
+  .container-box {
+    border: 2px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.8rem;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .flying {
+    transition: transform 0.6s ease, opacity 0.6s ease;
+  }
+
+  /* Destructuring labels */
+  .src-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    position: relative;
+  }
+  .src-key { color: var(--mauve); }
+  .src-val { color: var(--coffee); }
+  .target-var {
+    background: var(--surface);
+    border: 1px dashed var(--blue);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--blue);
+    transition: all 0.5s;
+  }
+  .target-var.filled {
+    border-style: solid;
+    border-color: var(--coffee);
+    color: var(--coffee);
+    background: rgba(245, 166, 35, 0.08);
+  }
+
+  /* this binding */
+  .ctx-box {
+    border: 2px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.8rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .ctx-box.active {
+    border-color: var(--coffee);
+    box-shadow: 0 0 16px rgba(245, 166, 35, 0.3);
+  }
+  .this-token {
+    background: var(--surface-2);
+    color: var(--coffee);
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+  }
+
+  /* Code highlighting */
+  .code-block {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .kw { color: var(--mauve); }
+  .fn { color: var(--blue); }
+  .str { color: var(--green); }
+  .num { color: var(--coffee); }
+  .cm { color: var(--dim); font-style: italic; }
+  .op { color: var(--pink); }
+
+  /* Console output */
+  .console {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    min-height: 60px;
+    color: var(--green);
+  }
+  .console .err { color: var(--red); }
+  .console .info { color: var(--muted); }
+  .console .label { color: var(--coffee); }
+
+  /* Truthy/Falsy demo */
+  .tf-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.6rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.4rem;
+    align-items: center;
+  }
+  .tf-row:hover { background: var(--surface); }
+  .tf-truthy { color: var(--green); }
+  .tf-falsy { color: var(--red); }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-[var(--border)] sticky top-0 backdrop-blur bg-[rgba(30,30,46,0.85)] z-40">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">☕</span>
+      <div>
+        <h1 class="text-base font-semibold">JS/TS Interactive Playground</h1>
+        <p class="text-xs muted">Coffee Shop Course · Week 1 Primer</p>
+      </div>
+    </div>
+    <a href="../js-ts-primer.md" class="btn text-xs">← กลับ Primer</a>
+  </div>
+
+  <nav class="max-w-7xl mx-auto px-4 flex gap-1 overflow-x-auto">
+    <button class="tab active" data-tab="scope">1. Scope · let/const/var</button>
+    <button class="tab" data-tab="types">2. Types · ===/==</button>
+    <button class="tab" data-tab="truthy">3. Truthy / Falsy</button>
+    <button class="tab" data-tab="arrays">4. Array Methods</button>
+    <button class="tab" data-tab="spread">5. Spread · Rest</button>
+    <button class="tab" data-tab="destructure">6. Destructuring</button>
+    <button class="tab" data-tab="arrow">7. Arrow · this</button>
+  </nav>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+<!-- 1. SCOPE -->
+<section id="scope" class="panel active">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">1. Variable Scope — <code>let</code> · <code>const</code> · <code>var</code></h2>
+    <p class="muted">ลอง declare ตัวแปรใน block แล้วดูว่าตัวไหนหลุดออกมาข้างนอก</p>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div class="surface rounded-xl p-5">
+      <h3 class="mono coffee text-sm mb-3">// pseudo-code</h3>
+      <pre class="code-block mb-4"><span class="kw">function</span> <span class="fn">demo</span>() {
+  <span class="kw">if</span> (<span class="kw">true</span>) {
+    <span id="line-var" class="kw">var</span> <span class="op">a</span> = <span class="num">1</span>;
+    <span id="line-let" class="kw">let</span> <span class="op">b</span> = <span class="num">2</span>;
+    <span id="line-const" class="kw">const</span> <span class="op">c</span> = <span class="num">3</span>;
+  }
+  <span class="cm">// access จาก outer scope:</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="op">a</span>); <span class="cm">// ?</span>
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="op">b</span>); <span class="cm">// ?</span>
+}</pre>
+      <div class="flex gap-2 flex-wrap">
+        <button class="btn btn-primary" onclick="scopeDemo()">▶ run demo</button>
+        <button class="btn" onclick="scopeReset()">reset</button>
+      </div>
+    </div>
+
+    <div>
+      <div id="scopeGlobal" class="scope-box global">
+        <div class="text-xs muted mb-2 mono">function scope (outer)</div>
+        <div id="scopeOuter" class="min-h-[60px]"></div>
+        <div class="mt-4">
+          <div id="scopeBlock" class="scope-box block">
+            <div class="text-xs muted mb-2 mono">if-block scope (inner)</div>
+            <div id="scopeInner" class="min-h-[40px]"></div>
+          </div>
+        </div>
+      </div>
+      <div id="scopeConsole" class="console mt-4 mono">
+        <span class="info">› กด "run demo" เพื่อดู</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="surface-2 rounded-xl p-4 mt-6 text-sm">
+    <strong class="coffee">เห็นอะไร:</strong>
+    <ul class="muted mt-1 space-y-1 list-disc list-inside">
+      <li><code class="text-[var(--red)]">var a</code> หลุดจาก block ขึ้นมาที่ function scope → access ได้จากข้างนอก</li>
+      <li><code class="text-[var(--blue)]">let b</code> และ <code class="text-[var(--green)]">const c</code> ติดอยู่ใน block scope → access จากข้างนอกไม่ได้ (ReferenceError)</li>
+      <li>นี่คือเหตุผลใหญ่ที่เลิกใช้ <code>var</code> ตั้งแต่ ES2015</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 2. TYPES -->
+<section id="types" class="panel">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">2. Types & Coercion — <code>===</code> vs <code>==</code></h2>
+    <p class="muted">JS แปลง type ให้อัตโนมัติเมื่อใช้ <code>==</code> — ลองพิมพ์ค่าแล้วดูผล</p>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div class="surface rounded-xl p-5">
+      <h3 class="text-sm coffee mb-3">🧪 ลองพิมพ์ 2 ค่า</h3>
+      <div class="space-y-3">
+        <label class="block">
+          <span class="text-xs muted">left</span>
+          <input id="leftVal" value="1" class="w-full mt-1 surface-2 px-3 py-2 rounded mono text-sm" />
+        </label>
+        <label class="block">
+          <span class="text-xs muted">right</span>
+          <input id="rightVal" value="'1'" class="w-full mt-1 surface-2 px-3 py-2 rounded mono text-sm" />
+        </label>
+      </div>
+      <button class="btn btn-primary mt-4" onclick="typesCompare()">▶ compare</button>
+      <div class="mt-4 text-xs muted">ลองค่าตัวอย่าง:
+        <button class="btn btn-ghost text-xs px-2 py-0.5" onclick="setVals('0','false')">0 vs false</button>
+        <button class="btn btn-ghost text-xs px-2 py-0.5" onclick="setVals('null','undefined')">null vs undefined</button>
+        <button class="btn btn-ghost text-xs px-2 py-0.5" onclick="setVals('[]','false')">[] vs false</button>
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <div class="surface rounded-xl p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs muted mono">typeof</span>
+          <span id="leftType" class="mono coffee">number</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs muted mono">typeof</span>
+          <span id="rightType" class="mono coffee">string</span>
+        </div>
+      </div>
+
+      <div class="surface rounded-xl p-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="text-center">
+            <div class="text-xs muted mb-1">strict (<code>===</code>)</div>
+            <div id="strictResult" class="text-2xl font-bold tf-falsy">false</div>
+          </div>
+          <div class="text-center">
+            <div class="text-xs muted mb-1">loose (<code>==</code>)</div>
+            <div id="looseResult" class="text-2xl font-bold tf-truthy">true</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface-2 rounded-xl p-4">
+        <div class="text-xs muted mb-1">JS แปลงเงียบ ๆ ตอน <code>==</code></div>
+        <div id="coerceMsg" class="text-sm mono">'1' → Number('1') → 1 · เลยเทียบเท่ากับ 1</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. TRUTHY/FALSY -->
+<section id="truthy" class="panel">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">3. Truthy / Falsy</h2>
+    <p class="muted">JS มี <strong>6 falsy values</strong> เท่านั้น — ที่เหลือ truthy หมด</p>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div class="surface rounded-xl p-5">
+      <h3 class="coffee text-sm mb-3">📋 ค่าทั้งหมด</h3>
+      <div id="tfList" class="space-y-1 text-sm"></div>
+    </div>
+
+    <div class="surface rounded-xl p-5">
+      <h3 class="coffee text-sm mb-3">🧪 ลอง if(...)</h3>
+      <input id="tfInput" value="''" class="w-full surface-2 px-3 py-2 rounded mono text-sm mb-3" />
+      <button class="btn btn-primary" onclick="tfTest()">▶ test</button>
+      <div id="tfResult" class="mt-4 text-center text-3xl font-bold">—</div>
+      <div id="tfMsg" class="mt-3 text-center muted text-sm">พิมพ์ค่าแล้วกด test</div>
+
+      <div class="mt-6 surface-2 rounded-lg p-3 text-sm">
+        <strong class="coffee">⚠️ Gotchas</strong>
+        <ul class="muted mt-2 space-y-1">
+          <li><code>[]</code> truthy แต่ <code>[].length</code> = 0 (falsy)</li>
+          <li><code>{}</code> truthy เสมอ</li>
+          <li><code>'0'</code> (string) truthy แต่ <code>0</code> falsy</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. ARRAYS -->
+<section id="arrays" class="panel">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">4. Array Methods — <code>map</code> · <code>filter</code> · <code>reduce</code></h2>
+    <p class="muted">non-mutating methods สร้าง array ใหม่ — สำคัญใน React state</p>
+  </div>
+
+  <div class="surface rounded-xl p-5 mb-4">
+    <div class="text-xs muted mono mb-2">arr =</div>
+    <div id="arrSource" class="flex gap-2 flex-wrap min-h-[60px]"></div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <button class="btn btn-primary" onclick="arrMap()">.map(x =&gt; x * 2)</button>
+    <button class="btn btn-primary" onclick="arrFilter()">.filter(x =&gt; x &gt; 2)</button>
+    <button class="btn btn-primary" onclick="arrReduce()">.reduce((s,x) =&gt; s+x)</button>
+    <button class="btn" onclick="arrReset()">reset</button>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="surface rounded-xl p-5">
+      <div class="text-xs muted mono mb-2">result =</div>
+      <div id="arrResult" class="flex gap-2 flex-wrap min-h-[60px] items-center">
+        <span class="muted text-sm">— กดปุ่มข้างบน</span>
+      </div>
+    </div>
+    <div class="surface-2 rounded-xl p-4 text-sm">
+      <div id="arrExplain" class="muted">
+        <strong class="coffee">hint:</strong> <code>map</code> = แปลงทุกตัว · <code>filter</code> = เลือกบางตัว · <code>reduce</code> = ยุบเป็นค่าเดียว
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. SPREAD -->
+<section id="spread" class="panel">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">5. Spread <code>...</code> &amp; Rest</h2>
+    <p class="muted">กระจายของจาก array/object ออก — pattern ที่เจอทุกครั้งใน React state update</p>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Array spread -->
+    <div class="surface rounded-xl p-5">
+      <h3 class="coffee text-sm mb-3">📦 Array spread</h3>
+      <pre class="code-block mb-3"><span class="kw">const</span> a = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+<span class="kw">const</span> b = [...a, <span class="num">4</span>, <span class="num">5</span>];</pre>
+
+      <div class="space-y-3">
+        <div>
+          <div class="text-xs muted mono mb-1">a</div>
+          <div id="spreadArrA" class="container-box">
+            <span class="arr-box">1</span>
+            <span class="arr-box">2</span>
+            <span class="arr-box">3</span>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs muted mono mb-1">b</div>
+          <div id="spreadArrB" class="container-box muted">
+            <span class="text-sm">— กด spread</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-primary" onclick="spreadArr()">▶ spread</button>
+        <button class="btn" onclick="spreadArrReset()">reset</button>
+      </div>
+    </div>
+
+    <!-- Object spread -->
+    <div class="surface rounded-xl p-5">
+      <h3 class="coffee text-sm mb-3">📦 Object spread (right wins)</h3>
+      <pre class="code-block mb-3"><span class="kw">const</span> base = { name: <span class="str">'Latte'</span>, price: <span class="num">65</span> };
+<span class="kw">const</span> next = { ...base, price: <span class="num">70</span> };</pre>
+
+      <div class="space-y-3">
+        <div>
+          <div class="text-xs muted mono mb-1">base</div>
+          <div id="spreadObjA" class="container-box">
+            <span class="src-item"><span class="src-key">name:</span> <span class="src-val">'Latte'</span></span>
+            <span class="src-item"><span class="src-key">price:</span> <span class="src-val">65</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs muted mono mb-1">next</div>
+          <div id="spreadObjB" class="container-box">
+            <span class="text-sm muted">— กด spread</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-primary" onclick="spreadObj()">▶ spread + override</button>
+        <button class="btn" onclick="spreadObjReset()">reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="surface-2 rounded-xl p-4 mt-6 text-sm">
+    <strong class="coffee">React analogy:</strong>
+    <code class="muted">setState({ ...state, count: state.count + 1 })</code> — copy ทุก field เก่า, override ที่ต้องเปลี่ยน. ห้าม mutate state เดิม.
+  </div>
+</section>
+
+<!-- 6. DESTRUCTURING -->
+<section id="destructure" class="panel">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">6. Destructuring</h2>
+    <p class="muted">ดึงค่าออกมาเป็นตัวแปร — pattern matching ฝั่งซ้ายของ <code>=</code></p>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Array destructure -->
+    <div class="surface rounded-xl p-5">
+      <h3 class="coffee text-sm mb-3">📋 Array destructuring</h3>
+      <pre class="code-block mb-3"><span class="kw">const</span> [first, , third, ...rest] =
+  [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>];</pre>
+
+      <div class="mb-3">
+        <div class="text-xs muted mono mb-1">source</div>
+        <div class="container-box">
+          <span class="arr-box" id="dArr0">10</span>
+          <span class="arr-box" id="dArr1">20</span>
+          <span class="arr-box" id="dArr2">30</span>
+          <span class="arr-box" id="dArr3">40</span>
+          <span class="arr-box" id="dArr4">50</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs muted mono mb-1">extracted</div>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <div class="target-var" id="tFirst">first = ?</div>
+          <div class="target-var" id="tThird">third = ?</div>
+          <div class="target-var" id="tRest">rest = ?</div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-primary" onclick="destrArr()">▶ extract</button>
+        <button class="btn" onclick="destrArrReset()">reset</button>
+      </div>
+    </div>
+
+    <!-- Object destructure -->
+    <div class="surface rounded-xl p-5">
+      <h3 class="coffee text-sm mb-3">📋 Object destructuring (rename + default)</h3>
+      <pre class="code-block mb-3"><span class="kw">const</span> {
+  name: title,
+  price,
+  discount = <span class="num">0</span>,
+} = product;</pre>
+
+      <div class="mb-3">
+        <div class="text-xs muted mono mb-1">product</div>
+        <div class="container-box">
+          <span class="src-item" id="dObjName"><span class="src-key">name:</span> <span class="src-val">'Latte'</span></span>
+          <span class="src-item" id="dObjPrice"><span class="src-key">price:</span> <span class="src-val">65</span></span>
+          <span class="src-item dim text-xs"><span class="src-key">discount:</span> <span class="dim">(missing)</span></span>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs muted mono mb-1">extracted</div>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <div class="target-var" id="tTitle">title = ?</div>
+          <div class="target-var" id="tPrice">price = ?</div>
+          <div class="target-var" id="tDiscount">discount = ?</div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-3">
+        <button class="btn btn-primary" onclick="destrObj()">▶ extract</button>
+        <button class="btn" onclick="destrObjReset()">reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="surface-2 rounded-xl p-4 mt-6 text-sm">
+    <strong class="coffee">React component:</strong> <code>const ProductCard = ({ title, price, onAdd }: Props) =&gt; ...</code> — destructure ใน param เลย
+  </div>
+</section>
+
+<!-- 7. ARROW THIS -->
+<section id="arrow" class="panel">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold coffee mb-2">7. Arrow Function · <code>this</code> Binding</h2>
+    <p class="muted">arrow ไม่มี <code>this</code> ของตัวเอง → ใช้ของ scope แม่ — แก้ปัญหา callback ที่ <code>this</code> หาย</p>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Regular function -->
+    <div>
+      <div class="text-xs muted mb-1 mono">❌ regular function</div>
+      <div id="ctxRegular" class="ctx-box">
+        <pre class="code-block"><span class="kw">class</span> <span class="fn">Cart</span> {
+  items = [];
+  <span class="fn">add</span>() {
+    [<span class="num">1</span>, <span class="num">2</span>].<span class="fn">forEach</span>(<span class="kw">function</span>(n) {
+      <span id="thisR" class="this-token">this</span>.items.<span class="fn">push</span>(n);
+    });
+  }
+}</pre>
+      </div>
+      <div id="thisRArrow" class="text-center mt-2 mono text-sm" style="opacity:0; transition: opacity 0.5s;">
+        ↓ <span class="text-[var(--red)]">this → undefined</span>
+      </div>
+    </div>
+
+    <!-- Arrow function -->
+    <div>
+      <div class="text-xs muted mb-1 mono">✅ arrow function</div>
+      <div id="ctxArrow" class="ctx-box">
+        <pre class="code-block"><span class="kw">class</span> <span class="fn">Cart</span> {
+  items = [];
+  <span class="fn">add</span>() {
+    [<span class="num">1</span>, <span class="num">2</span>].<span class="fn">forEach</span>((n) =&gt; {
+      <span id="thisA" class="this-token">this</span>.items.<span class="fn">push</span>(n);
+    });
+  }
+}</pre>
+      </div>
+      <div id="thisAArrow" class="text-center mt-2 mono text-sm" style="opacity:0; transition: opacity 0.5s;">
+        ↓ <span class="text-[var(--green)]">this → Cart instance</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center my-6">
+    <button class="btn btn-primary" onclick="thisDemo()">▶ run cart.add()</button>
+    <button class="btn ml-2" onclick="thisReset()">reset</button>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="surface-2 rounded-xl p-4">
+      <div class="text-xs muted mb-2">📺 Cart instance (regular)</div>
+      <div id="cartR" class="mono text-sm coffee">items = []</div>
+      <div id="cartRMsg" class="mt-2 text-xs"></div>
+    </div>
+    <div class="surface-2 rounded-xl p-4">
+      <div class="text-xs muted mb-2">📺 Cart instance (arrow)</div>
+      <div id="cartA" class="mono text-sm coffee">items = []</div>
+      <div id="cartAMsg" class="mt-2 text-xs"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="border-t border-[var(--border)] mt-12 py-6">
+  <div class="max-w-7xl mx-auto px-4 text-center text-xs muted">
+    📚 อ่านเต็ม → <a href="../js-ts-primer.md" class="coffee underline">js-ts-primer.md</a> ·
+    🎬 Slides → <code>docs/slides/week-1</code>
+  </div>
+</footer>
+
+<script>
+// ===== Tab switching =====
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.tab).classList.add('active');
+  });
+});
+
+// ===== 1. SCOPE =====
+function chip(name, val, kind) {
+  const el = document.createElement('span');
+  el.className = `chip ${kind}`;
+  el.textContent = `${name} = ${val}`;
+  el.dataset.kind = kind;
+  return el;
+}
+function scopeReset() {
+  document.getElementById('scopeOuter').innerHTML = '';
+  document.getElementById('scopeInner').innerHTML = '';
+  document.getElementById('scopeConsole').innerHTML = '<span class="info">› กด "run demo" เพื่อดู</span>';
+}
+async function scopeDemo() {
+  scopeReset();
+  const inner = document.getElementById('scopeInner');
+  const outer = document.getElementById('scopeOuter');
+  const log = document.getElementById('scopeConsole');
+  log.innerHTML = '';
+
+  // Step 1: declare in block
+  await sleep(300);
+  const cVar = chip('a', '1', 'var');
+  const cLet = chip('b', '2', 'let');
+  const cConst = chip('c', '3', 'const');
+  inner.appendChild(cVar);
+  inner.appendChild(cLet);
+  inner.appendChild(cConst);
+  log.innerHTML += '<div class="info">› declared a (var), b (let), c (const) in if-block</div>';
+
+  // Step 2: var escapes
+  await sleep(900);
+  log.innerHTML += '<div class="info">› block ends — var hoists out, let/const die</div>';
+  cVar.classList.add('escaped');
+  await sleep(500);
+  outer.appendChild(cVar);
+  cLet.classList.add('faded');
+  cConst.classList.add('faded');
+
+  // Step 3: access from outside
+  await sleep(700);
+  log.innerHTML += '<div><span class="label">log(a)</span> → <span style="color:var(--coffee)">1</span> ✅</div>';
+  await sleep(500);
+  log.innerHTML += '<div><span class="label">log(b)</span> → <span class="err">ReferenceError: b is not defined</span> ❌</div>';
+}
+
+// ===== 2. TYPES =====
+function setVals(l, r) {
+  document.getElementById('leftVal').value = l;
+  document.getElementById('rightVal').value = r;
+  typesCompare();
+}
+function typesCompare() {
+  const l = document.getElementById('leftVal').value;
+  const r = document.getElementById('rightVal').value;
+  let lv, rv;
+  try { lv = eval(`(${l})`); } catch { lv = l; }
+  try { rv = eval(`(${r})`); } catch { rv = r; }
+
+  const ltype = Array.isArray(lv) ? 'object (array)' : (lv === null ? 'object (null)' : typeof lv);
+  const rtype = Array.isArray(rv) ? 'object (array)' : (rv === null ? 'object (null)' : typeof rv);
+  document.getElementById('leftType').textContent = ltype;
+  document.getElementById('rightType').textContent = rtype;
+
+  const strict = lv === rv;
+  // eslint-disable-next-line eqeqeq
+  const loose = lv == rv;
+  const sEl = document.getElementById('strictResult');
+  const lEl = document.getElementById('looseResult');
+  sEl.textContent = strict; sEl.className = 'text-2xl font-bold ' + (strict ? 'tf-truthy' : 'tf-falsy');
+  lEl.textContent = loose;  lEl.className = 'text-2xl font-bold ' + (loose ? 'tf-truthy' : 'tf-falsy');
+
+  let msg = '';
+  if (strict !== loose) {
+    msg = `⚠️ ต่างกัน! \`==\` แปลง type ให้ก่อนเทียบ — \`===\` ไม่แปลง`;
+  } else if (ltype !== rtype) {
+    msg = `type ต่างกัน (${ltype} vs ${rtype}) แต่ผลเหมือนกัน`;
+  } else {
+    msg = `type เดียวกัน → \`==\` กับ \`===\` ผลเหมือนกัน`;
+  }
+  document.getElementById('coerceMsg').textContent = msg;
+}
+
+// ===== 3. TRUTHY/FALSY =====
+const tfValues = [
+  { v: 'false',     t: false, label: 'false' },
+  { v: '0',         t: false, label: '0' },
+  { v: "''",        t: false, label: "'' (empty string)" },
+  { v: 'null',      t: false, label: 'null' },
+  { v: 'undefined', t: false, label: 'undefined' },
+  { v: 'NaN',       t: false, label: 'NaN' },
+  { v: 'true',      t: true,  label: 'true' },
+  { v: '1',         t: true,  label: '1, -1, 0.1' },
+  { v: "'a'",       t: true,  label: "'hello' (any non-empty)" },
+  { v: '[]',        t: true,  label: '[] (empty array — surprise!)' },
+  { v: '{}',        t: true,  label: '{} (empty object — surprise!)' },
+  { v: "'0'",       t: true,  label: "'0' (string zero — surprise!)" },
+];
+function renderTfList() {
+  const el = document.getElementById('tfList');
+  el.innerHTML = tfValues.map(x => `
+    <div class="tf-row">
+      <code class="${x.t ? 'tf-truthy' : 'tf-falsy'}">${x.label}</code>
+      <span class="text-xs muted">→</span>
+      <span class="${x.t ? 'tf-truthy' : 'tf-falsy'} font-bold">${x.t ? 'truthy' : 'falsy'}</span>
+    </div>`).join('');
+}
+function tfTest() {
+  const v = document.getElementById('tfInput').value;
+  let val;
+  try { val = eval(`(${v})`); } catch { val = v; }
+  const truthy = !!val;
+  const r = document.getElementById('tfResult');
+  r.textContent = truthy ? 'TRUTHY ✓' : 'FALSY ✗';
+  r.className = `mt-4 text-center text-3xl font-bold ${truthy ? 'tf-truthy' : 'tf-falsy'}`;
+  document.getElementById('tfMsg').textContent = `if (${v}) { ... } → block ${truthy ? 'รัน' : 'ไม่รัน'}`;
+}
+
+// ===== 4. ARRAYS =====
+const arrInitial = [1, 2, 3, 4, 5];
+function makeBox(val, cls = '') {
+  const el = document.createElement('span');
+  el.className = `arr-box ${cls}`;
+  el.textContent = val;
+  return el;
+}
+function arrReset() {
+  const src = document.getElementById('arrSource');
+  src.innerHTML = '';
+  arrInitial.forEach(v => src.appendChild(makeBox(v)));
+  document.getElementById('arrResult').innerHTML = '<span class="muted text-sm">— กดปุ่มข้างบน</span>';
+  document.getElementById('arrExplain').innerHTML = '<strong class="coffee">hint:</strong> <code>map</code> = แปลงทุกตัว · <code>filter</code> = เลือกบางตัว · <code>reduce</code> = ยุบเป็นค่าเดียว';
+}
+function arrMap() {
+  const r = document.getElementById('arrResult');
+  r.innerHTML = '';
+  arrInitial.forEach((v, i) => {
+    const b = makeBox(v * 2, 'transformed entering');
+    b.style.animationDelay = (i * 80) + 'ms';
+    r.appendChild(b);
+  });
+  document.getElementById('arrExplain').innerHTML =
+    '<strong class="coffee">.map(x =&gt; x * 2)</strong> → ทุกตัวแปลงเป็น 2 เท่า · array ใหม่ length เท่าเดิม';
+}
+function arrFilter() {
+  const r = document.getElementById('arrResult');
+  r.innerHTML = '';
+  // First show original with filtered-out marked
+  arrInitial.forEach((v, i) => {
+    const b = makeBox(v, v > 2 ? 'kept entering' : 'filtered-out entering');
+    b.style.animationDelay = (i * 80) + 'ms';
+    r.appendChild(b);
+  });
+  setTimeout(() => {
+    r.querySelectorAll('.filtered-out').forEach(el => {
+      el.style.transition = 'all 0.4s';
+      el.style.opacity = '0';
+      el.style.width = '0';
+      el.style.padding = '0';
+      el.style.margin = '0';
+    });
+  }, 1200);
+  document.getElementById('arrExplain').innerHTML =
+    '<strong class="coffee">.filter(x =&gt; x &gt; 2)</strong> → เก็บเฉพาะที่ผ่าน predicate · array ใหม่อาจสั้นลง';
+}
+function arrReduce() {
+  const r = document.getElementById('arrResult');
+  r.innerHTML = '';
+  const total = arrInitial.reduce((s, n) => s + n, 0);
+  const big = makeBox(total, 'transformed entering');
+  big.style.fontSize = '1.6rem';
+  big.style.width = '90px';
+  big.style.height = '90px';
+  r.appendChild(big);
+  document.getElementById('arrExplain').innerHTML =
+    `<strong class="coffee">.reduce((s,x) =&gt; s+x, 0)</strong> → ยุบเป็นค่าเดียว: 1+2+3+4+5 = <span class="coffee">${total}</span>`;
+}
+
+// ===== 5. SPREAD =====
+function spreadArrReset() {
+  document.getElementById('spreadArrB').innerHTML = '<span class="text-sm muted">— กด spread</span>';
+}
+function spreadArr() {
+  const b = document.getElementById('spreadArrB');
+  b.innerHTML = '';
+  [1, 2, 3, 4, 5].forEach((v, i) => {
+    const box = makeBox(v, 'entering');
+    box.style.animationDelay = (i * 100) + 'ms';
+    if (i < 3) box.style.borderColor = 'var(--blue)';
+    else box.style.borderColor = 'var(--coffee)';
+    b.appendChild(box);
+  });
+}
+function spreadObjReset() {
+  document.getElementById('spreadObjB').innerHTML = '<span class="text-sm muted">— กด spread</span>';
+}
+function spreadObj() {
+  const b = document.getElementById('spreadObjB');
+  b.innerHTML = '';
+  const items = [
+    { k: 'name', v: "'Latte'", from: 'base' },
+    { k: 'price', v: '70', from: 'override', strike: "'65'" },
+  ];
+  items.forEach((it, i) => {
+    const span = document.createElement('span');
+    span.className = 'src-item';
+    span.style.opacity = '0';
+    span.style.transition = 'opacity 0.5s, transform 0.5s';
+    span.style.transform = 'translateY(-10px)';
+    span.innerHTML = `<span class="src-key">${it.k}:</span> ${it.strike ? `<span class="dim line-through mr-1">${it.strike}</span>` : ''}<span class="src-val">${it.v}</span>`;
+    if (it.from === 'override') {
+      span.style.borderColor = 'var(--coffee)';
+    }
+    b.appendChild(span);
+    setTimeout(() => {
+      span.style.opacity = '1';
+      span.style.transform = 'translateY(0)';
+    }, 100 + i * 250);
+  });
+}
+
+// ===== 6. DESTRUCTURING =====
+function destrArrReset() {
+  ['tFirst', 'tThird', 'tRest'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('filled');
+    const labels = ['first', 'third', 'rest'];
+    el.textContent = `${labels[i]} = ?`;
+  });
+  for (let i = 0; i < 5; i++) {
+    document.getElementById('dArr' + i).style.borderColor = '';
+    document.getElementById('dArr' + i).style.color = '';
+  }
+}
+async function destrArr() {
+  destrArrReset();
+  const map = [
+    { srcId: 'dArr0', tgtId: 'tFirst', name: 'first', value: '10' },
+    { srcId: 'dArr2', tgtId: 'tThird', name: 'third', value: '30' },
+    { srcId: 'dArr3', tgtId: 'tRest', name: 'rest', value: '[40, 50]', highlights: ['dArr3', 'dArr4'] },
+  ];
+  for (const m of map) {
+    const ids = m.highlights || [m.srcId];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      el.style.borderColor = 'var(--coffee)';
+      el.style.color = 'var(--coffee)';
+    });
+    await sleep(400);
+    const t = document.getElementById(m.tgtId);
+    t.textContent = `${m.name} = ${m.value}`;
+    t.classList.add('filled');
+    await sleep(450);
+  }
+  // Mark skipped
+  document.getElementById('dArr1').style.opacity = '0.4';
+}
+function destrObjReset() {
+  ['tTitle', 'tPrice', 'tDiscount'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('filled');
+    const labels = ['title', 'price', 'discount'];
+    el.textContent = `${labels[i]} = ?`;
+  });
+  document.getElementById('dObjName').style.borderColor = '';
+  document.getElementById('dObjPrice').style.borderColor = '';
+}
+async function destrObj() {
+  destrObjReset();
+  const map = [
+    { srcId: 'dObjName', tgtId: 'tTitle', name: 'title', value: "'Latte'", note: '(rename)' },
+    { srcId: 'dObjPrice', tgtId: 'tPrice', name: 'price', value: '65' },
+    { srcId: null, tgtId: 'tDiscount', name: 'discount', value: '0', note: '(default)' },
+  ];
+  for (const m of map) {
+    if (m.srcId) {
+      const el = document.getElementById(m.srcId);
+      el.style.borderColor = 'var(--coffee)';
+    }
+    await sleep(400);
+    const t = document.getElementById(m.tgtId);
+    t.textContent = `${m.name} = ${m.value} ${m.note || ''}`;
+    t.classList.add('filled');
+    await sleep(450);
+  }
+}
+
+// ===== 7. ARROW THIS =====
+function thisReset() {
+  document.getElementById('ctxRegular').classList.remove('active');
+  document.getElementById('ctxArrow').classList.remove('active');
+  document.getElementById('cartR').textContent = 'items = []';
+  document.getElementById('cartA').textContent = 'items = []';
+  document.getElementById('cartRMsg').innerHTML = '';
+  document.getElementById('cartAMsg').innerHTML = '';
+  document.getElementById('thisRArrow').style.opacity = '0';
+  document.getElementById('thisAArrow').style.opacity = '0';
+}
+async function thisDemo() {
+  thisReset();
+  // Regular function — fails
+  document.getElementById('ctxRegular').classList.add('active');
+  await sleep(500);
+  document.getElementById('thisRArrow').style.opacity = '1';
+  await sleep(700);
+  document.getElementById('cartRMsg').innerHTML = '<span class="text-[var(--red)]">❌ TypeError: Cannot read property \'push\' of undefined</span><div class="muted mt-1">forEach callback มี this ของตัวเอง = undefined (strict mode)</div>';
+
+  await sleep(800);
+  // Arrow function — works
+  document.getElementById('ctxArrow').classList.add('active');
+  await sleep(500);
+  document.getElementById('thisAArrow').style.opacity = '1';
+  await sleep(500);
+
+  const cartA = document.getElementById('cartA');
+  cartA.textContent = 'items = []';
+  await sleep(300);
+  cartA.textContent = 'items = [1]';
+  await sleep(300);
+  cartA.textContent = 'items = [1, 2]';
+  document.getElementById('cartAMsg').innerHTML = '<span class="text-[var(--green)]">✅ pushed 2 items</span><div class="muted mt-1">arrow ไม่มี this ของตัวเอง → ใช้ของ Cart instance</div>';
+}
+
+// ===== Helpers =====
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Init
+renderTfList();
+scopeReset();
+arrReset();
+typesCompare();
+</script>
+</body>
+</html>
