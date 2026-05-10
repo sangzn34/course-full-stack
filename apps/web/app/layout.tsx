@@ -3,6 +3,7 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { LocatorRuntime } from '@/components/providers/locator-runtime';
 
 const fontSans = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="th" className={cn('font-sans', fontSans.variable)}>
       <body className="bg-background text-foreground min-h-screen antialiased">
+        <LocatorRuntime />
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

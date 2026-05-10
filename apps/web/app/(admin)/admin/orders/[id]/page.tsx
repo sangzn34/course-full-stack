@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Order, OrderStatus } from '@coffee/shared';
@@ -24,8 +25,8 @@ const NEXT_STATUS: Partial<Record<OrderStatus, { next: OrderStatus; label: strin
 const formatDateTime = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleString('th-TH') : '—';
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const qc = useQueryClient();
 
   const {

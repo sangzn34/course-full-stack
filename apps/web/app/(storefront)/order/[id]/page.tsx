@@ -1,12 +1,13 @@
 'use client';
 
+import { use } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
 import { OrderStatusBadge } from '@/components/order-status-badge';
 import type { Order } from '@coffee/shared';
 
-export default function OrderPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
 
   const {
     data: order,
